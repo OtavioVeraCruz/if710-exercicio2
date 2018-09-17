@@ -3,6 +3,7 @@ package br.ufpe.cin.if710.rss
 import android.app.Activity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.widget.LinearLayout
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.doAsync
@@ -16,13 +17,14 @@ import java.net.URL
 
 class MainActivity : Activity() {
 
-    val RSS_FEED= "http://leopoldomt.com/if1001/g1brasil.xml"
+    var RSS_FEED=""
     private var mAdapter=FeedAdapter(emptyList(),this)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        conteudoRSS.layoutManager =LinearLayoutManager(this,LinearLayout.VERTICAL,false)
+        conteudoRSS.layoutManager = LinearLayoutManager(this,LinearLayout.VERTICAL,false) as RecyclerView.LayoutManager?
         conteudoRSS.adapter = mAdapter
+        RSS_FEED= getString(R.string.RSS)
     }
 
     @Throws(IOException::class)
@@ -63,6 +65,7 @@ class MainActivity : Activity() {
 
     fun async(url:String){
         doAsync {
+
             val xml =  getRssFeed(url)
             val list = ParserRSS.parse(xml)
             //permite que conteudos da thread principal posssam ser alteradas para uma thread alternativa
