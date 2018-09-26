@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="GERAL">
+        <EditTextPreference
+            android:key="uname"
+            android:dialogMessage="Digite a URL desejada"
+            android:dialogTitle="Alterar URL"
+            android:negativeButtonText="Cancelar"
+            android:positiveButtonText="Enviar"
+            android:title="URL_FEED"></EditTextPreference>
+    </PreferenceCategory>
+
+</PreferenceScreen>

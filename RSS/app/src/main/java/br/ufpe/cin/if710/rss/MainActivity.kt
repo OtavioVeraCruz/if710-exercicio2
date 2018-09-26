@@ -1,11 +1,17 @@
 package br.ufpe.cin.if710.rss
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.preference.PreferenceManager
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.LinearLayout
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.ByteArrayOutputStream
@@ -15,7 +21,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 
-class MainActivity : Activity() {
+class MainActivity : AppCompatActivity()  {
 
     var RSS_FEED=""
     private var mAdapter=FeedAdapter(emptyList(),this)
@@ -24,7 +30,7 @@ class MainActivity : Activity() {
         setContentView(R.layout.activity_main)
         conteudoRSS.layoutManager = LinearLayoutManager(this,LinearLayout.VERTICAL,false) as RecyclerView.LayoutManager?
         conteudoRSS.adapter = mAdapter
-        RSS_FEED= getString(R.string.RSS)
+        RSS_FEED = getString(R.string.RSS)
     }
 
     @Throws(IOException::class)
@@ -55,12 +61,35 @@ class MainActivity : Activity() {
     override fun onStart() {
         super.onStart()
         try {
-            async(RSS_FEED)
+            val prefs= PreferenceManager.getDefaultSharedPreferences(this)
+            val feed= prefs.getString(USERNAME,RSS_FEED)
+            async(feed)
         }
         catch (message:IOException){
             message.printStackTrace()
         }
 
+    }
+    companion object {
+        val USERNAME = "uname"
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu to use in the action bar
+        val inflater = menuInflater
+        inflater.inflate(R.menu.main_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle presses on the action bar menu items
+        when (item.itemId) {
+            R.id.prefs -> {
+              startActivity(Intent(this@MainActivity,PrefsActivity::class.java))
+              return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     fun async(url:String){
