@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import br.ufpe.cin.if710.rss.db.SQLiteRSSHelper
 import kotlinx.android.synthetic.main.itemlista.view.*
 
 class FeedAdapter (var items :List<ItemRSS>, private val c: Context) :
@@ -18,6 +19,8 @@ class FeedAdapter (var items :List<ItemRSS>, private val c: Context) :
         holder.bindView(item)
         //abre a página a partir do link
         holder.itemView.setOnClickListener{
+            val db=SQLiteRSSHelper.getInstance(c.applicationContext)
+            db.markAsRead(item.link)
             val uri = Uri.parse(item.link)
             c.startActivity(Intent(Intent.ACTION_VIEW, uri))
         }

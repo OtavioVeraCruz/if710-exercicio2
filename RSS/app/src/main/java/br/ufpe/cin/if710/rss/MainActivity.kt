@@ -30,13 +30,14 @@ import java.net.URL
 class MainActivity : AppCompatActivity()  {
 
     var RSS_FEED=""
-    private var mAdapter=FeedAdapter(emptyList(),this)
+    var mAdapter=FeedAdapter(emptyList(),this)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         conteudoRSS.layoutManager = LinearLayoutManager(this,LinearLayout.VERTICAL,false) as RecyclerView.LayoutManager?
         conteudoRSS.adapter = mAdapter
         RSS_FEED = getString(R.string.RSS)
+       
     }
     private val receiver=MyReceiver()
 
@@ -66,9 +67,10 @@ class MainActivity : AppCompatActivity()  {
     }
 
     companion object {
+
         val USERNAME = "uname"
         @Throws(IOException::class)
-        public fun getRssFeed(feed:String):String {
+        fun getRssFeed(feed:String):String {
             var inputStream: InputStream? = null
             var rssFeed = ""
             try{
