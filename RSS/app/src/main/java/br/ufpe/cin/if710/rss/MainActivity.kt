@@ -1,15 +1,21 @@
 package br.ufpe.cin.if710.rss
 
 import android.app.Activity
+import android.app.IntentService
+import android.content.BroadcastReceiver
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.LinearLayout
+import br.ufpe.cin.if710.rss.Receiver.MyReceiver
+import br.ufpe.cin.if710.rss.service.CarregaFeedClass
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doAsync
@@ -32,46 +38,59 @@ class MainActivity : AppCompatActivity()  {
         conteudoRSS.adapter = mAdapter
         RSS_FEED = getString(R.string.RSS)
     }
+    private val receiver=MyReceiver()
 
-    @Throws(IOException::class)
-    private fun getRssFeed(feed:String):String {
-        var inputStream: InputStream? = null
-        var rssFeed = ""
-        try{
-            val url= URL(feed)
-            val conn: HttpURLConnection = url.openConnection() as HttpURLConnection
-            inputStream = conn.getInputStream()
-            val out = ByteArrayOutputStream()
-            val buffer = ByteArray(1024)
-            var count:Int = inputStream.read(buffer)
-            while (count != -1) {
-                out.write(buffer, 0, count)
-                count = inputStream.read(buffer)
-            }
-            val response = out.toByteArray()
-            rssFeed = String(response, charset("UTF-8"))
-        }finally {
-            if(inputStream != null) {
-                inputStream.close()
-            }
-        }
-        return rssFeed
-    }
 
     override fun onStart() {
         super.onStart()
-        try {
-            val prefs= PreferenceManager.getDefaultSharedPreferences(this)
-            val feed= prefs.getString(USERNAME,RSS_FEED)
-            async(feed)
-        }
-        catch (message:IOException){
-            message.printStackTrace()
-        }
+
+        val prefs= PreferenceManager.getDefaultSharedPreferences(this)
+        val link= prefs.getString(USERNAME,RSS_FEED)
+        val intent=Intent(this,CarregaFeedClass::class.java)
+        intent.putExtra("link",link)
+        startService(intent)
 
     }
+
+    override fun onResume() {
+        super.onResume()
+        val intentFilter=IntentFilter(CarregaFeedClass.FEED_LOADED)
+        registerReceiver(receiver,intentFilter)
+    }
+
+
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver(receiver)
+
+    }
+
     companion object {
         val USERNAME = "uname"
+        @Throws(IOException::class)
+        public fun getRssFeed(feed:String):String {
+            var inputStream: InputStream? = null
+            var rssFeed = ""
+            try{
+                val url= URL(feed)
+                val conn: HttpURLConnection = url.openConnection() as HttpURLConnection
+                inputStream = conn.getInputStream()
+                val out = ByteArrayOutputStream()
+                val buffer = ByteArray(1024)
+                var count:Int = inputStream.read(buffer)
+                while (count != -1) {
+                    out.write(buffer, 0, count)
+                    count = inputStream.read(buffer)
+                }
+                val response = out.toByteArray()
+                rssFeed = String(response, charset("UTF-8"))
+            }finally {
+                if(inputStream != null) {
+                    inputStream.close()
+                }
+            }
+            return rssFeed
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
