@@ -1,23 +1,22 @@
 package br.ufpe.cin.if710.rss
 
-import android.app.Activity
-import android.app.IntentService
-import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.LinearLayout
-import br.ufpe.cin.if710.rss.Receiver.MyReceiver
+import android.widget.Toast
+import br.ufpe.cin.if710.rss.receiver.MyDynamicReceiver
+import br.ufpe.cin.if710.rss.db.SQLiteRSSHelper
 import br.ufpe.cin.if710.rss.service.CarregaFeedClass
 import kotlinx.android.synthetic.main.activity_main.*
-import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.ByteArrayOutputStream
@@ -30,17 +29,18 @@ import java.net.URL
 class MainActivity : AppCompatActivity()  {
 
     var RSS_FEED=""
-    var mAdapter=FeedAdapter(emptyList(),this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        conteudoRSS.layoutManager = LinearLayoutManager(this,LinearLayout.VERTICAL,false) as RecyclerView.LayoutManager?
+        mAdapter= FeedAdapter(emptyList(),this.applicationContext)
+        conteudoRSS.layoutManager = LinearLayoutManager(this,LinearLayout.VERTICAL,
+                false)
         conteudoRSS.adapter = mAdapter
         RSS_FEED = getString(R.string.RSS)
-       
-    }
-    private val receiver=MyReceiver()
 
+    }
+    private val receiver=MyDynamicReceiver()
 
     override fun onStart() {
         super.onStart()
@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity()  {
         val intent=Intent(this,CarregaFeedClass::class.java)
         intent.putExtra("link",link)
         startService(intent)
+        Log.d("Servico","Iniciado")
 
     }
 
@@ -59,7 +60,6 @@ class MainActivity : AppCompatActivity()  {
         registerReceiver(receiver,intentFilter)
     }
 
-
     override fun onStop() {
         super.onStop()
         unregisterReceiver(receiver)
@@ -68,11 +68,11 @@ class MainActivity : AppCompatActivity()  {
 
     companion object {
 
-        val USERNAME = "uname"
+        const val USERNAME = "uname"
         @Throws(IOException::class)
         fun getRssFeed(feed:String):String {
             var inputStream: InputStream? = null
-            var rssFeed = ""
+            var rssFeed: String
             try{
                 val url= URL(feed)
                 val conn: HttpURLConnection = url.openConnection() as HttpURLConnection
@@ -92,6 +92,25 @@ class MainActivity : AppCompatActivity()  {
                 }
             }
             return rssFeed
+        }
+
+        var mAdapter:FeedAdapter?=null
+
+        private var db:SQLiteRSSHelper?=null
+
+        fun exibirFeed(context:Context) {
+            doAsync {
+                if (db==null){
+                    db=SQLiteRSSHelper.getInstance(context)
+                }
+                val items= db!!.getItems()
+                Log.d("Exibindo feed","Feed")
+                uiThread{
+                    Toast.makeText(context,"Feed carregado", Toast.LENGTH_LONG).show()
+                    mAdapter!!.lista=items
+                    mAdapter!!.notifyDataSetChanged()
+                }
+            }
         }
     }
 
@@ -121,9 +140,11 @@ class MainActivity : AppCompatActivity()  {
             //permite que conteudos da thread principal posssam ser alteradas para uma thread alternativa
             uiThread {
                 //modifica a lista do adapter
-                mAdapter.items = list
-                mAdapter.notifyDataSetChanged()
+                mAdapter!!.items = list
+                mAdapter!!.notifyDataSetChanged()
             }
         }
     }
+
+
 }

@@ -12,35 +12,36 @@ import kotlinx.android.synthetic.main.itemlista.view.*
 
 class FeedAdapter (var items :List<ItemRSS>, private val c: Context) :
         RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
+        var lista = items
 
     //pra cada item da lista, coloca as informacoes dentro dos Textviews
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items.get(position)
-        holder.bindView(item)
-        //abre a página a partir do link
-        holder.itemView.setOnClickListener{
-            val db=SQLiteRSSHelper.getInstance(c.applicationContext)
-            db.markAsRead(item.link)
-            val uri = Uri.parse(item.link)
-            c.startActivity(Intent(Intent.ACTION_VIEW, uri))
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val item = lista.get(position)
+            holder.bindView(item)
+            //abre a página a partir do link
+            holder.itemView.setOnClickListener{
+                val db=SQLiteRSSHelper.getInstance(c.applicationContext)
+                db.markAsRead(item.link)
+                val uri = Uri.parse(item.link)
+                c.startActivity(Intent(Intent.ACTION_VIEW, uri))
+            }
+
+        }
+        //Infla o layout, para posteriormente associar aos componentes
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(c).inflate(R.layout.itemlista,parent,false)
+            return ViewHolder(view)
         }
 
-    }
-    //Infla o layout, para posteriormente associar aos componentes
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(c).inflate(R.layout.itemlista,parent,false)
-        return ViewHolder(view)
-    }
+        //retorna o tamanho da lista
+        override fun getItemCount(): Int = lista.size
 
-    //retorna o tamanho da lista
-    override fun getItemCount(): Int = items.size
+        //associa os valores dos itens aos textviews
+        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    //associa os valores dos itens aos textviews
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-        fun bindView(item: ItemRSS) {
-          itemView.item_titulo.text=item.title
-          itemView.item_data.text=item.pubDate
+            fun bindView(item: ItemRSS) {
+              itemView.item_titulo.text=item.title
+              itemView.item_data.text=item.pubDate
+            }
         }
-    }
 }

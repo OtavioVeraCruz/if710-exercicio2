@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,7 +22,11 @@
         <activity android:name=".PrefsActivity"/>
 
         <service android:name=".service.CarregaFeedClass"/>
-
+        <receiver android:name=".receiver.MyStaticReceiver">
+            <intent-filter>
+                <action android:name="br.ufpe.cin.if710.rss.receiver.INSERTED_DATA"/>
+            </intent-filter>
+        </receiver>
 
     </application>
 

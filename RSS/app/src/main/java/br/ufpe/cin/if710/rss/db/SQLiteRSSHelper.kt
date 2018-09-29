@@ -5,10 +5,12 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 import br.ufpe.cin.if710.rss.ItemRSS
 import org.jetbrains.anko.db.*
 
 class SQLiteRSSHelper(ctx:Context) : ManagedSQLiteOpenHelper(ctx, "if710", null, 1) {
+
     companion object {
         //Nome da tabela do Banco a ser usada
         val DATABASE_TABLE = "items"
@@ -50,14 +52,14 @@ class SQLiteRSSHelper(ctx:Context) : ManagedSQLiteOpenHelper(ctx, "if710", null,
 
     fun insertItem(item:ItemRSS){
         val db = this.writableDatabase
-
         db.insert(DATABASE_TABLE, ITEM_TITLE to item.title, ITEM_DATE to item.pubDate,
-                ITEM_DESC to item.description, ITEM_LINK to item.link, ITEM_READ to item.read)
+                    ITEM_DESC to item.description, ITEM_LINK to item.link, ITEM_READ to item.read)
+
     }
 
     fun getItem(link:String): ItemRSS? {
         val selection= ITEM_LINK+" = ?"
-        val selection_args= arrayOf(ITEM_LINK)
+        val selection_args= arrayOf(link)
 
         val c:Cursor=this.readableDatabase.query(DATABASE_TABLE, columns,selection,selection_args,
                 null,null,null)
@@ -78,10 +80,24 @@ class SQLiteRSSHelper(ctx:Context) : ManagedSQLiteOpenHelper(ctx, "if710", null,
 
     }
 
-    fun getItems():Cursor{
+    fun getItems():List<ItemRSS>{
         val query="select * from "+ DATABASE_TABLE+" where "+ ITEM_READ+" = "+"0"
 
-        return this.readableDatabase.rawQuery(query,null)
+        val c= this.readableDatabase.rawQuery(query,null)
+        var lista= ArrayList<ItemRSS>()
+        while (c.moveToNext()){
+
+            var title=c.getString(c.getColumnIndexOrThrow(ITEM_TITLE))
+            var date=c.getString(c.getColumnIndexOrThrow(ITEM_DATE))
+            var desc=c.getString(c.getColumnIndexOrThrow(ITEM_DESC))
+            var link=c.getString(c.getColumnIndexOrThrow(ITEM_LINK))
+            var read=c.getString(c.getColumnIndexOrThrow(ITEM_READ))
+
+            if (read.equals("0")) {
+                lista.add(ItemRSS(title, link, date, desc, read))
+            }
+        }
+        return lista
 
     }
 
@@ -98,6 +114,7 @@ class SQLiteRSSHelper(ctx:Context) : ManagedSQLiteOpenHelper(ctx, "if710", null,
             val clause = ITEM_LINK+ " = ?"
             val up:Int=this.writableDatabase.update(DATABASE_TABLE,content,clause, arrayOf(link))
             aux = (up==1)
+            Log.d("Item",item.title+" marcado como lido!")
         }
         return aux
     }
@@ -120,7 +137,7 @@ class SQLiteRSSHelper(ctx:Context) : ManagedSQLiteOpenHelper(ctx, "if710", null,
 
     }
 }
-// Access property for Context
+// Access property from Context
 val Context.database: SQLiteRSSHelper
     get() = SQLiteRSSHelper.getInstance(getApplicationContext())
 

@@ -1,16 +1,17 @@
-package br.ufpe.cin.if710.rss.Receiver
+package br.ufpe.cin.if710.rss.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import br.ufpe.cin.if710.rss.MainActivity
-import br.ufpe.cin.if710.rss.db.SQLiteRSSHelper
 
-class MyReceiver: BroadcastReceiver(){
+class MyDynamicReceiver : BroadcastReceiver(){
 
     override fun onReceive(context: Context?, intent: Intent?) {
-       val db= SQLiteRSSHelper.getInstance(context!!)
 
+        if (context != null) {
+            MainActivity.exibirFeed(context)
+        }
     }
 
 }

@@ -117,7 +117,7 @@ object ParserRSS {
                 skip(parser)
             }
         }
-        return ItemRSS(title!!, link!!, pubDate!!, description!!)
+        return ItemRSS(title!!, link!!, pubDate!!, description!!,"0")
     }
 
     // Processa tags de forma parametrizada no feed.

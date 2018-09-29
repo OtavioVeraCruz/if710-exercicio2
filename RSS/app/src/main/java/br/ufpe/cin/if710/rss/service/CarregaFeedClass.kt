@@ -12,26 +12,33 @@ import java.io.IOException
 
 class CarregaFeedClass: IntentService("CarregaFeed") {
 
-    val db=SQLiteRSSHelper.getInstance(this)
+    var db:SQLiteRSSHelper?=null
     companion object {
-        val FEED_LOADED="br.ufpe.cin.if710.rss.action.FEED_LOADED"
+        val FEED_LOADED="br.ufpe.cin.if710.rss.FEED_LOADED"
+        val INSERTED_DATA="br.ufpe.cin.if710.rss.INSERTED_DATA"
     }
 
-    //val INSERTED_DATA="br.ufpe.cin.if710.rss.INSERTED_DATA"
+
 
 
     override fun onHandleIntent(intent: Intent?) {
+        db=SQLiteRSSHelper.getInstance(this.applicationContext)
+        Log.d("CarregaFeed", "Ok")
         val link= intent!!.getStringExtra("link")
         try {
             val xml= MainActivity.getRssFeed(link)
             val list = ParserRSS.parse(xml)
 
             for (item:ItemRSS in list){
-                val aux=db.getItem(item.link)
+                val aux= db!!.getItem(item.link)
                 if (aux==null){
-                    //sendBroadcast(Intent(INSERTED_DATA))
-                    db.insertItem(item)
+
+                    sendBroadcast(Intent(INSERTED_DATA))
                     Log.d("DB", "Encontrado pela primeira vez: " + item.title)
+                    db!!.insertItem(item)
+                }
+                else{
+                    Log.d("DB", "Já foi inserido: " + item.title)
                 }
             }
 
@@ -43,7 +50,7 @@ class CarregaFeedClass: IntentService("CarregaFeed") {
             e.printStackTrace()
         }
         finally {
-            db.close()
+            db!!.close()
         }
 
     }
