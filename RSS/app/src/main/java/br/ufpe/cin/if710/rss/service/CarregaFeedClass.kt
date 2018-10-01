@@ -13,15 +13,14 @@ import java.io.IOException
 class CarregaFeedClass: IntentService("CarregaFeed") {
 
     var db:SQLiteRSSHelper?=null
+
     companion object {
         val FEED_LOADED="br.ufpe.cin.if710.rss.FEED_LOADED"
         val INSERTED_DATA="br.ufpe.cin.if710.rss.INSERTED_DATA"
     }
 
-
-
-
     override fun onHandleIntent(intent: Intent?) {
+
         db=SQLiteRSSHelper.getInstance(this.applicationContext)
         Log.d("CarregaFeed", "Ok")
         val link= intent!!.getStringExtra("link")
@@ -32,7 +31,6 @@ class CarregaFeedClass: IntentService("CarregaFeed") {
             for (item:ItemRSS in list){
                 val aux= db!!.getItem(item.link)
                 if (aux==null){
-
                     sendBroadcast(Intent(INSERTED_DATA))
                     Log.d("DB", "Encontrado pela primeira vez: " + item.title)
                     db!!.insertItem(item)
@@ -43,6 +41,7 @@ class CarregaFeedClass: IntentService("CarregaFeed") {
             }
 
             sendBroadcast(Intent(FEED_LOADED))
+
         }
         catch (io:IOException){
             io.printStackTrace()

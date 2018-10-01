@@ -13,5 +13,4 @@ class MyDynamicReceiver : BroadcastReceiver(){
             MainActivity.exibirFeed(context)
         }
     }
-
 }

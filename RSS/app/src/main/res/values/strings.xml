@@ -3,4 +3,7 @@
     <string name="rssfeed">http://leopoldomt.com/if1001/g1brasil.xml</string>
     <string name="RSS">http://leopoldomt.com/if1001/g1brasil.xml</string>
     <string name="prefer_ncias">Preferências</string>
+    <string name="notification_channel_description">notification</string>
+
+
 </resources>

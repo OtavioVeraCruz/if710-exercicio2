@@ -17,8 +17,8 @@ class MyStaticReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
 
         val intent_main=Intent(context,MainActivity::class.java)
-        val pendingIntent=PendingIntent.getActivity(context,0,intent_main,0)
-        val builder=NotificationCompat.Builder(context!!, channel_id)
+        val pendingIntent= PendingIntent.getActivity(context,0,intent_main,0)
+        val builder=NotificationCompat.Builder(context!!)
         builder.setSmallIcon(R.mipmap.ic_launcher)
         builder.setContentTitle("Nova notícia inserida!")
         builder.setContentText("Não fique desatualizado!")
